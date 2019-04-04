@@ -18,7 +18,7 @@ import static android.support.constraint.Constraints.TAG;
 
 public class MyFirebaseInstanceService extends FirebaseMessagingService {
 
-    @Override
+/*    @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
@@ -60,4 +60,5 @@ public class MyFirebaseInstanceService extends FirebaseMessagingService {
         // Instance ID token to your app server.
        // sendRegistrationToServer(token);
     }
+*/
 }

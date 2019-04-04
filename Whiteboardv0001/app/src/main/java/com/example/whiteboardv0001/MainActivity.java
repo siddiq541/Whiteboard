@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 if (firebaseAuth.getCurrentUser() !=null)
-                    startActivity(new Intent(MainActivity.this, activityStream.class));
+                    startActivity(new Intent(MainActivity.this, MainMsg.class));
             }
         };
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
