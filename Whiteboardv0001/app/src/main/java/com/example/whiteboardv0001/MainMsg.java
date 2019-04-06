@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,14 +21,13 @@ import com.scaledrone.lib.Scaledrone;
 import java.util.Random;
 
 public class MainMsg extends AppCompatActivity implements RoomListener {
-
-    // replace this with a real channelID from Scaledrone dashboard
     private String channelID = "QJuB2vugMoa06YpC";
-    private String roomName = "observable-room";
+    private String roomName = "observable-room"; // Must have prefix of "observable-"
     private EditText editText;
     private Scaledrone scaledrone;
     private MessageAdapter messageAdapter;
     private ListView messagesView;
+    DatabaseHelper messageDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,7 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         messageAdapter = new MessageAdapter(this);
         messagesView = (ListView) findViewById(R.id.messages_view);
         messagesView.setAdapter(messageAdapter);
+        messageDB = new DatabaseHelper(this);
 
         MemberData data = new MemberData(getRandomName(), getRandomColor());
 
@@ -65,6 +66,16 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
                 System.err.println(reason);
             }
         });
+    }
+
+    public void saveMessage(String userID, String message){
+        boolean saveSuccess = messageDB.addData(userID, channelID, roomName, message);
+
+         if (saveSuccess == true){
+             Toast.makeText(MainMsg.this, "Message saved!", Toast.LENGTH_LONG).show();
+         } else {
+             Toast.makeText(MainMsg.this, "Failed to save message!", Toast.LENGTH_LONG).show();
+         }
     }
 
     public void sendMessage(View view) {
