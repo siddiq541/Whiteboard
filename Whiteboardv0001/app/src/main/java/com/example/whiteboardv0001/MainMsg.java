@@ -103,6 +103,7 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
             final MemberData data = mapper.treeToValue(receivedMessage.getMember().getClientData(), MemberData.class);
             boolean belongsToCurrentUser = receivedMessage.getClientID().equals(scaledrone.getClientID());
             final Message message = new Message(receivedMessage.getData().asText(), data, belongsToCurrentUser);
+            saveMessage(data.getName(), message.getText());
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
