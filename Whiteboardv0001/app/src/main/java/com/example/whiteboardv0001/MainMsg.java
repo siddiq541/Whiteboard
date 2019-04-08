@@ -69,15 +69,7 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     }
 
     public void saveMessage(String userID, String message){
-        boolean saveSuccess = this.messageDB.addData(userID, this.channelID, this.roomName, message);
-
-        /* This breaks message display
-         if (saveSuccess == true){
-             Toast.makeText(MainMsg.this, "Message saved!", Toast.LENGTH_LONG).show();
-         } else {
-             Toast.makeText(MainMsg.this, "Failed to save message!", Toast.LENGTH_LONG).show();
-         }
-         */
+        messageDB.addData(userID, channelID, roomName, message);
     }
 
     public void sendMessage(View view) {
