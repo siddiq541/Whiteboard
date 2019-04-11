@@ -11,6 +11,9 @@ import android.widget.ListView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.scaledrone.lib.Listener;
 import com.scaledrone.lib.Member;
 import com.scaledrone.lib.Room;
@@ -28,6 +31,8 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     private Scaledrone scaledrone;
     private MessageAdapter messageAdapter;
     private ListView messagesView;
+    private DatabaseHelper dbHelper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,7 +45,9 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         messagesView = (ListView) findViewById(R.id.messages_view);
         messagesView.setAdapter(messageAdapter);
 
-        MemberData data = new MemberData(getRandomName(), getRandomColor());
+        MemberData data = new MemberData(getCurrentUsername(), getRandomColor());
+
+        dbHelper = new DatabaseHelper();
 
         scaledrone = new Scaledrone(channelID, data);
         scaledrone.connect(new Listener() {
@@ -88,10 +95,20 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     @Override
     public void onMessage(Room room, com.scaledrone.lib.Message receivedMessage) {
         final ObjectMapper mapper = new ObjectMapper();
+        String senderName, roomName, messageContent;
         try {
             final MemberData data = mapper.treeToValue(receivedMessage.getMember().getClientData(), MemberData.class);
             boolean belongsToCurrentUser = receivedMessage.getClientID().equals(scaledrone.getClientID());
             final Message message = new Message(receivedMessage.getData().asText(), data, belongsToCurrentUser);
+
+            // Save message to database
+            senderName = message.getMemberData().getName();
+            roomName = room.getName();
+            messageContent = message.getText();
+
+            dbHelper.saveMessage(senderName, roomName, messageContent);
+
+            // Update UI and send message?
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -104,14 +121,28 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         }
     }
 
-    private String getRandomName() {
-        String[] adjs = {"autumn", "hidden", "bitter", "misty", "silent", "empty", "dry", "dark", "summer", "icy", "delicate", "quiet", "white", "cool", "spring", "winter", "patient", "twilight", "dawn", "crimson", "wispy", "weathered", "blue", "billowing", "broken", "cold", "damp", "falling", "frosty", "green", "long", "late", "lingering", "bold", "little", "morning", "muddy", "old", "red", "rough", "still", "small", "sparkling", "throbbing", "shy", "wandering", "withered", "wild", "black", "young", "holy", "solitary", "fragrant", "aged", "snowy", "proud", "floral", "restless", "divine", "polished", "ancient", "purple", "lively", "nameless"};
-        String[] nouns = {"waterfall", "river", "breeze", "moon", "rain", "wind", "sea", "morning", "snow", "lake", "sunset", "pine", "shadow", "leaf", "dawn", "glitter", "forest", "hill", "cloud", "meadow", "sun", "glade", "bird", "brook", "butterfly", "bush", "dew", "dust", "field", "fire", "flower", "firefly", "feather", "grass", "haze", "mountain", "night", "pond", "darkness", "snowflake", "silence", "sound", "sky", "shape", "surf", "thunder", "violet", "water", "wildflower", "wave", "water", "resonance", "sun", "wood", "dream", "cherry", "tree", "fog", "frost", "voice", "paper", "frog", "smoke", "star"};
-        return (
-                adjs[(int) Math.floor(Math.random() * adjs.length)] +
-                        "_" +
-                        nouns[(int) Math.floor(Math.random() * nouns.length)]
-        );
+    private String getCurrentUsername() {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        String displayName, email;
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // Name, email address, and profile photo Url
+            displayName = user.getDisplayName();
+            email = user.getEmail();
+            //Uri photoUrl = user.getPhotoUrl();
+
+            // Check if user's email is verified
+            //boolean emailVerified = user.isEmailVerified();
+
+            // The user's ID, unique to the Firebase project. Do NOT use this value to
+            // authenticate with your backend server, if you have one. Use
+            // FirebaseUser.getIdToken() instead.
+            //String uid = user.getUid();
+        } else {
+            return "NoUsername";
+        }
+
+        return displayName;
     }
 
     private String getRandomColor() {
@@ -127,6 +158,7 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
 class MemberData {
     private String name;
     private String color;
+
 
     public MemberData(String name, String color) {
         this.name = name;
