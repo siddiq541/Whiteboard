@@ -49,6 +49,8 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
 
         dbHelper = new DatabaseHelper();
 
+        dbHelper.loadMessages(roomName);
+
         scaledrone = new Scaledrone(channelID, data);
         scaledrone.connect(new Listener() {
             @Override
@@ -82,14 +84,20 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         }
     }
 
+    public void getRoomMessageHistory(String room) {
+        // Logic to display all messages that have been posted to the room
+    }
+
     @Override
     public void onOpen(Room room) {
         System.out.println("Connected to room");
     }
 
-    @Override
+    @Override // This triggers when the connection is dropped
     public void onOpenFailure(Room room, Exception ex) {
         System.err.println(ex);
+        // See scaledrone java docs for how to reconnect after connection drop.
+        // https://github.com/ScaleDrone/scaledrone-java#reconnecting
     }
 
     @Override
