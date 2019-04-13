@@ -11,6 +11,7 @@ import android.widget.ListView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -20,6 +21,7 @@ import com.scaledrone.lib.Room;
 import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
+import java.lang.reflect.Array;
 import java.util.Random;
 
 public class MainMsg extends AppCompatActivity implements RoomListener {
@@ -32,6 +34,7 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     private MessageAdapter messageAdapter;
     private ListView messagesView;
     private DatabaseHelper dbHelper;
+    private FirebaseUser user;
 
 
     @Override
@@ -45,11 +48,11 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         messagesView = (ListView) findViewById(R.id.messages_view);
         messagesView.setAdapter(messageAdapter);
 
+        user = FirebaseAuth.getInstance().getCurrentUser();
         MemberData data = new MemberData(getCurrentUsername(), getRandomColor());
 
-        dbHelper = new DatabaseHelper();
-
-        dbHelper.loadMessages(roomName);
+        dbHelper = new DatabaseHelper(roomName);
+        loadHistoricMessages();
 
         scaledrone = new Scaledrone(channelID, data);
         scaledrone.connect(new Listener() {
@@ -76,16 +79,23 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         });
     }
 
+    public void loadHistoricMessages(){
+        // Somehow take the raw data from our firestore DB and populate the screen with it?
+        // This method loads in raw key/value pairs from DB: dbHelper.loadMessages();
+    }
+
     public void sendMessage(View view) {
         String message = editText.getText().toString();
+        String senderUID = FirebaseAuth.getInstance().getUid();
+        String senderName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        Timestamp timestamp = Timestamp.now();
+
         if (message.length() > 0) {
             scaledrone.publish(roomName, message);
             editText.getText().clear();
-        }
-    }
 
-    public void getRoomMessageHistory(String room) {
-        // Logic to display all messages that have been posted to the room
+            dbHelper.saveMessage(senderUID, senderName, message, timestamp);
+        }
     }
 
     @Override
@@ -103,19 +113,10 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     @Override
     public void onMessage(Room room, com.scaledrone.lib.Message receivedMessage) {
         final ObjectMapper mapper = new ObjectMapper();
-        String senderName, roomName, messageContent;
         try {
             final MemberData data = mapper.treeToValue(receivedMessage.getMember().getClientData(), MemberData.class);
             boolean belongsToCurrentUser = receivedMessage.getClientID().equals(scaledrone.getClientID());
             final Message message = new Message(receivedMessage.getData().asText(), data, belongsToCurrentUser);
-
-            // Save message to database
-            senderName = message.getMemberData().getName();
-            roomName = room.getName();
-            messageContent = message.getText();
-
-            dbHelper.saveMessage(senderName, roomName, messageContent);
-
             // Update UI and send message?
             runOnUiThread(new Runnable() {
                 @Override
@@ -130,22 +131,11 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     }
 
     private String getCurrentUsername() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        String displayName, email;
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        String displayName;
+
+        user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            // Name, email address, and profile photo Url
             displayName = user.getDisplayName();
-            email = user.getEmail();
-            //Uri photoUrl = user.getPhotoUrl();
-
-            // Check if user's email is verified
-            //boolean emailVerified = user.isEmailVerified();
-
-            // The user's ID, unique to the Firebase project. Do NOT use this value to
-            // authenticate with your backend server, if you have one. Use
-            // FirebaseUser.getIdToken() instead.
-            //String uid = user.getUid();
         } else {
             return "NoUsername";
         }
