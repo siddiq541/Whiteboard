@@ -1,9 +1,8 @@
 package com.example.whiteboardv0001;
 
-
-
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -22,7 +21,13 @@ import com.scaledrone.lib.RoomListener;
 import com.scaledrone.lib.Scaledrone;
 
 import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import static android.support.constraint.Constraints.TAG;
 
 public class MainMsg extends AppCompatActivity implements RoomListener {
 
@@ -52,7 +57,6 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         MemberData data = new MemberData(getCurrentUsername(), getRandomColor());
 
         dbHelper = new DatabaseHelper(roomName);
-        loadHistoricMessages();
 
         scaledrone = new Scaledrone(channelID, data);
         scaledrone.connect(new Listener() {
@@ -60,6 +64,8 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
             public void onOpen() {
                 System.out.println("Scaledrone connection open");
                 scaledrone.subscribe(roomName, MainMsg.this);
+                System.out.println("Displaying historic room messages from database...");
+                displayHistoricMessages();
             }
 
             @Override
@@ -79,15 +85,29 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
         });
     }
 
-    public void loadHistoricMessages(){
-        // Somehow take the raw data from our firestore DB and populate the screen with it?
-        // This method loads in raw key/value pairs from DB: dbHelper.loadMessages();
+    // Messages are not reaching here from "dbHlper.loadMessages()....???
+    public void displayHistoricMessages(){
+            for (HashMap<String, String> databaseMessage : dbHelper.loadMessages()) {
+                //Take the hashmap from our database and convert it to a scaledrone message object
+                final MemberData memberData = new MemberData(databaseMessage.get("senderName"), getRandomColor()); // Replace random colour with color gathered from database
+                boolean belongsToCurrentUser = user.getUid().equals(databaseMessage.get("senderUID"));
+                final Message scaledroneMessage = new Message(databaseMessage.get("messageContent"), memberData, belongsToCurrentUser);
+
+                // Update UI with new message
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        messageAdapter.add(scaledroneMessage);
+                        messagesView.setSelection(messagesView.getCount() - 1);
+                    }
+                });
+            }
     }
 
     public void sendMessage(View view) {
         String message = editText.getText().toString();
-        String senderUID = FirebaseAuth.getInstance().getUid();
-        String senderName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        String senderUID = user.getUid();
+        String senderName = user.getDisplayName();
         Timestamp timestamp = Timestamp.now();
 
         if (message.length() > 0) {
@@ -117,7 +137,8 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
             final MemberData data = mapper.treeToValue(receivedMessage.getMember().getClientData(), MemberData.class);
             boolean belongsToCurrentUser = receivedMessage.getClientID().equals(scaledrone.getClientID());
             final Message message = new Message(receivedMessage.getData().asText(), data, belongsToCurrentUser);
-            // Update UI and send message?
+
+            // Update UI with new message
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
@@ -182,3 +203,4 @@ class MemberData {
                 '}';
     }
 }
+

@@ -8,11 +8,9 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreSettings;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
@@ -23,9 +21,6 @@ import java.util.Map;
 import static android.support.constraint.Constraints.TAG;
 
 public class DatabaseHelper {
-    // Reference to the currently logged in user (used to access name/email/id etc)
-    private FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-
     // References to our database:
     // -Whole Database
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -42,6 +37,7 @@ public class DatabaseHelper {
 
     // Constructor
     public DatabaseHelper(String newCurrentRoom){
+        firebaseTimestampFix();
         currentRoom = newCurrentRoom;
         updateDatabaseRefs();
     }
@@ -55,6 +51,13 @@ public class DatabaseHelper {
         updateDatabaseRefs();
     }
 
+    private void firebaseTimestampFix() {
+        FirebaseFirestoreSettings settings = new FirebaseFirestoreSettings.Builder()
+                .setTimestampsInSnapshotsEnabled(true)
+                .build();
+        db.setFirestoreSettings(settings);
+    }
+
     private void updateDatabaseRefs() {
         messagesColRef = db.collection(ROOMS_COLLECTION).document(currentRoom).collection(MESSAGES_COLLECTION);
     }
@@ -65,7 +68,7 @@ public class DatabaseHelper {
         message.put(SENDER_UID_KEY, senderUID);
         message.put(SENDER_NAME_KEY, senderName);
         message.put(MESSAGE_CONTENT_KEY, messageContent);
-        message.put(TIMESTAMP_KEY, timestamp);
+        // Timestamp not used (buggy)
 
         // Send our key/value pair object "message" to the database.
         messagesColRef.document()
@@ -84,8 +87,10 @@ public class DatabaseHelper {
                 });
     }
 
-    public void loadMessages() {
-        // Query the database for all messages within database where the room name matches our own
+    // Grab our room messages, convert them to a hashmap, then return them all in an array.
+    public ArrayList<HashMap> loadMessages() {
+        final ArrayList<HashMap> messagesArray = new ArrayList<>();
+        // Database query
         messagesColRef
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -94,8 +99,14 @@ public class DatabaseHelper {
                         if (task.isSuccessful()) {
                             // Loop through each message from the room
                             for (QueryDocumentSnapshot document : task.getResult()) {
+                                // Place database values into a hashmap
+                                HashMap<String, String> message = new HashMap<>();
+                                message.put("senderUID", document.getString(SENDER_UID_KEY));
+                                message.put("senderName", document.getString(SENDER_NAME_KEY));
+                                message.put("messageContent", document.getString(MESSAGE_CONTENT_KEY));
 
-                                // Log output for debugging in logcat
+                                messagesArray.add(message);
+                                Log.d(TAG, "senderName: " + message.get("senderName"));
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                             }
                         } else {
@@ -103,6 +114,10 @@ public class DatabaseHelper {
                         }
                     }
                 });
+
+        return messagesArray;
     }
+
+
 }
 
