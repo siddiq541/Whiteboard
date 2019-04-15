@@ -64,8 +64,6 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
             public void onOpen() {
                 System.out.println("Scaledrone connection open");
                 scaledrone.subscribe(roomName, MainMsg.this);
-                System.out.println("Displaying historic room messages from database...");
-                displayHistoricMessages();
             }
 
             @Override
@@ -87,7 +85,9 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
 
     // Messages are not reaching here from "dbHlper.loadMessages()....???
     public void displayHistoricMessages(){
-            for (HashMap<String, String> databaseMessage : dbHelper.loadMessages()) {
+        ArrayList<HashMap> databaseMessageArray = dbHelper.loadMessages();
+
+            for (HashMap<String, String> databaseMessage : databaseMessageArray) {
                 //Take the hashmap from our database and convert it to a scaledrone message object
                 final MemberData memberData = new MemberData(databaseMessage.get("senderName"), getRandomColor()); // Replace random colour with color gathered from database
                 boolean belongsToCurrentUser = user.getUid().equals(databaseMessage.get("senderUID"));
@@ -101,7 +101,10 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
                         messagesView.setSelection(messagesView.getCount() - 1);
                     }
                 });
+
             }
+
+
     }
 
     public void sendMessage(View view) {
@@ -121,6 +124,8 @@ public class MainMsg extends AppCompatActivity implements RoomListener {
     @Override
     public void onOpen(Room room) {
         System.out.println("Connected to room");
+        System.out.println("RunningDisplayHistoricMessages");
+        displayHistoricMessages();
     }
 
     @Override // This triggers when the connection is dropped

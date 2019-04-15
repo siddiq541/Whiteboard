@@ -25,8 +25,11 @@ public class MessageAdapter extends BaseAdapter {
 
 
     public void add(Message message) {
+
         this.messages.add(message);
         notifyDataSetChanged();
+
+        System.out.println("MessageAdapter->add("+ message.getText() + ")"); // FOR DEBUG
     }
 
     @Override
@@ -49,6 +52,8 @@ public class MessageAdapter extends BaseAdapter {
         MessageViewHolder holder = new MessageViewHolder();
         LayoutInflater messageInflater = (LayoutInflater) context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
         Message message = messages.get(i);
+
+        System.out.println("getView->message: " + message.getText()); // FOR DEBUG
 
         if (message.isBelongsToCurrentUser()) {
             convertView = messageInflater.inflate(R.layout.my_message, null);
