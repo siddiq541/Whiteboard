@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Whiteboardv0.0.0.1</string>
+    <string name="appTitle">WHITEBOARD</string>
+    <string name="sign_out">Sign out</string>
+    <string name="mTitle">Activity Stream</string>
+    <string name="msg">new message</string>
+    <string name="message">Message</string>
+    <string name="profile">Profile</string>
+</resources>
