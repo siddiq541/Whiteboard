@@ -29,7 +29,6 @@ public class SignInActivity extends AppCompatActivity {
 
     SignInButton signInButton;
     FirebaseAuth mAuth;
-    private static final String TAG = "SignInActivity";
     private final static int RC_SIGN_IN = 2;
     GoogleSignInClient mGoogleSignInClient;
     FirebaseAuth.AuthStateListener mAuthListner;
@@ -90,19 +89,6 @@ public class SignInActivity extends AppCompatActivity {
             }
         }
     }
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.googleBtn:
-                break;
-        }
-    }
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-        Toast.makeText(this, "Google Play Services error.", Toast.LENGTH_SHORT).show();
-    }
-
     private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
         AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
         mAuth.signInWithCredential(credential)
