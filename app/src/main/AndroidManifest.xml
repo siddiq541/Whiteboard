@@ -20,6 +20,7 @@
 
         <activity android:name=".activityStream">
         </activity>
+        <activity android:name=".SignInActivity"></activity>
         <activity
             android:name=".MainMsg"
             android:label="@string/appTitle"
