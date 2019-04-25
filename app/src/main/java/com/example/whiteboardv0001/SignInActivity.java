@@ -59,17 +59,9 @@ public class SignInActivity extends AppCompatActivity {
         mAuthListner = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                // <Get userRole from Firebase realtime database, place it in userRole var below>
-                String userRole = "user"; // e.g this would be our result for a normal user log in.
-
                 if (firebaseAuth.getCurrentUser() !=null ) {
-                    Intent mainIntent = new Intent(SignInActivity.this, MainActivity.class); // Create Intent
-                    mainIntent.putExtra("userRole", userRole); // place our userRole variable into our intent
-                    startActivity(mainIntent); // Start and switch to MainActivity.java, passing our user role with it.
-
-                    // To get our userRole value while inside MainActivity.java, we use:
-                    //     Bundle extras = getIntent().getExtras(); // Get the entire extras Bundle
-                    //     String value = extras.getString("key"); // Access our userRole using it's "key" userRole
+                    Intent mainIntent = new Intent(SignInActivity.this, MainActivity.class);
+                    startActivity(mainIntent);
                 }
             }
         };
