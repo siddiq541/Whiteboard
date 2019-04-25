@@ -122,6 +122,7 @@ public class MainActivity extends AppCompatActivity
     private  FirebaseUser mFirebaseUser;
     private DatabaseReference mFirebaseDatabaseReference;
     private FirebaseRecyclerAdapter<WhiteboardMessage, MessageViewHolder> mFirebaseAdapter;
+    private String userRole;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -296,16 +297,17 @@ public class MainActivity extends AppCompatActivity
     // Take the userRole variable from the SignIn.java activity intent and alter UI
     // for either user or admin
     public void updateUiBasedOnUserRole() {
-        Bundle extras = getIntent().getExtras(); // Get the entire extras Bundle from SignIn intent
-        if (extras != null) {
-            String userRole = extras.getString("userRole"); // Access our userRole using it's "key" userRole
+            userRole = "user"; // Replace hardcoded "user" with a value retrieved from DB
 
             // if the user is NOT an admin, make input area invisible.
             if (userRole != "admin") {
                 mMessageEditText.setVisibility(View.GONE);
                 mSendButton.setVisibility(View.GONE);
             }
-        }
+            else { // Otherwise show them
+                mMessageEditText.setVisibility(View.VISIBLE);
+                mSendButton.setVisibility(View.VISIBLE);
+            }
     }
 
     @Override
