@@ -289,6 +289,23 @@ public class MainActivity extends AppCompatActivity
                 // Select image for image message on click.
             }
         });
+
+        updateUiBasedOnUserRole();
+    }
+
+    // Take the userRole variable from the SignIn.java activity intent and alter UI
+    // for either user or admin
+    public void updateUiBasedOnUserRole() {
+        Bundle extras = getIntent().getExtras(); // Get the entire extras Bundle from SignIn intent
+        if (extras != null) {
+            String userRole = extras.getString("userRole"); // Access our userRole using it's "key" userRole
+
+            // if the user is NOT an admin, make input area invisible.
+            if (userRole != "admin") {
+                mMessageEditText.setVisibility(View.INVISIBLE);
+                mSendButton.setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     @Override
