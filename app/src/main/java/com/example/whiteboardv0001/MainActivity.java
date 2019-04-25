@@ -302,8 +302,8 @@ public class MainActivity extends AppCompatActivity
 
             // if the user is NOT an admin, make input area invisible.
             if (userRole != "admin") {
-                mMessageEditText.setVisibility(View.INVISIBLE);
-                mSendButton.setVisibility(View.INVISIBLE);
+                mMessageEditText.setVisibility(View.GONE);
+                mSendButton.setVisibility(View.GONE);
             }
         }
     }
