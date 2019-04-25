@@ -58,6 +58,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -297,6 +298,21 @@ public class MainActivity extends AppCompatActivity
     // Take the userRole variable from the SignIn.java activity intent and alter UI
     // for either user or admin
     public void updateUiBasedOnUserRole() {
+        String defaultRole = "user";
+        String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
+        String userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference newUser = database.getReference("users/" + userid);
+        Map<String,Object> users = new HashMap<>();
+        users.put("email", userEmail);
+        users.put("role", defaultRole);
+        newUser.setValue(users);
+        //dbUsers  = FirebaseDatabase.getInstance().getReference("users");
+        Query query = FirebaseDatabase.getInstance().getReference("users")
+                .getParent();
+
+            Log.d(TAG, "this is my id" + query);
+
             userRole = "user"; // Replace hardcoded "user" with a value retrieved from DB
 
             // if the user is NOT an admin, make input area invisible.
