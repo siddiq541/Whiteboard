@@ -56,9 +56,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -71,7 +73,10 @@ import android.content.Intent;
 import android.widget.Toast;
 import android.view.View;
 import android.util.Log;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import android.net.Uri;
 import android.os.Bundle;
@@ -291,13 +296,61 @@ public class MainActivity extends AppCompatActivity
                 // Select image for image message on click.
             }
         });
-
+        checkUserExist();
         updateUiBasedOnUserRole();
     }
 
     // Take the userRole variable from the SignIn.java activity intent and alter UI
     // for either user or admin
+    public void checkUserExist(){
+       String userID = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Query query = FirebaseDatabase.getInstance().getReference("users")
+                .orderByChild("id")
+                .equalTo(userID);
+
+        query.toString();
+        Log.d(TAG, "new parent" + query);
+        query.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                showData(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+    private void showData(DataSnapshot dataSnapshot) {
+
+        for (DataSnapshot ds: dataSnapshot.getChildren()) {
+           /* UserInformation uInfo = new UserInformation();
+            uInfo.setEmail(ds.child("email").getValue(UserInformation.class).getEmail());
+            uInfo.setuId(ds.child("id").getValue(String.class));
+            uInfo.setRole(ds.child("role").getValue(String.class));
+            userRole = uInfo.getEmail();*/
+            userRole = ds.child("role").getValue().toString();
+            Log.d(TAG, "this may get role " + userRole);
+            Log.d(TAG, "role " + userRole);
+
+        }
+        String uType = "admin";
+        if (userRole.equals(uType)) {
+            mMessageEditText.setVisibility(View.VISIBLE);
+            mSendButton.setVisibility(View.VISIBLE);
+
+        }
+        else { // Otherwise show them
+            Log.d(TAG, "non visibility " + userRole);
+            mMessageEditText.setVisibility(View.GONE);
+            mSendButton.setVisibility(View.GONE);
+        }
+
+    }
     public void updateUiBasedOnUserRole() {
+
+
         String defaultRole = "user";
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         String userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -306,25 +359,21 @@ public class MainActivity extends AppCompatActivity
         Map<String,Object> users = new HashMap<>();
         users.put("email", userEmail);
         users.put("role", defaultRole);
+        users.put("id",userid);
         newUser.setValue(users);
         //dbUsers  = FirebaseDatabase.getInstance().getReference("users");
-        Query query = FirebaseDatabase.getInstance().getReference("users")
-                .getParent();
+     //   Query query = FirebaseDatabase.getInstance().getReference("users")
+       //         .getParent();
 
-            Log.d(TAG, "this is my id" + query);
 
-            userRole = "user"; // Replace hardcoded "user" with a value retrieved from DB
+            //userRole = "user"; // Replace hardcoded "user" with a value retrieved from DB
 
             // if the user is NOT an admin, make input area invisible.
-            if (userRole != "admin") {
-                mMessageEditText.setVisibility(View.GONE);
-                mSendButton.setVisibility(View.GONE);
-            }
-            else { // Otherwise show them
-                mMessageEditText.setVisibility(View.VISIBLE);
-                mSendButton.setVisibility(View.VISIBLE);
-            }
+            Log.d(TAG, "user role = " +userRole);
+
+
     }
+
 
     @Override
     public void onStart() {
