@@ -297,7 +297,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
         checkUserExist();
-        updateUiBasedOnUserRole();
     }
 
     // Take the userRole variable from the SignIn.java activity intent and alter UI
@@ -336,7 +335,11 @@ public class MainActivity extends AppCompatActivity
 
         }
         String uType = "admin";
-        if (userRole.equals(uType)) {
+        if (userRole == null)
+        {
+            addUser();
+        }
+        else if (userRole.equals(uType)) {
             mMessageEditText.setVisibility(View.VISIBLE);
             mSendButton.setVisibility(View.VISIBLE);
 
@@ -348,10 +351,10 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
-    public void updateUiBasedOnUserRole() {
+    public void addUser() {
 
 
-       /* String defaultRole = "user";
+        String defaultRole = "user";
         String userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         String userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -360,7 +363,7 @@ public class MainActivity extends AppCompatActivity
         users.put("email", userEmail);
         users.put("role", defaultRole);
         users.put("id",userid);
-        newUser.setValue(users);*/
+        newUser.setValue(users);
         //dbUsers  = FirebaseDatabase.getInstance().getReference("users");
      //   Query query = FirebaseDatabase.getInstance().getReference("users")
        //         .getParent();
