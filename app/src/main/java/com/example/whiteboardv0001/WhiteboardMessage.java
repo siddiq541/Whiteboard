@@ -8,7 +8,6 @@ public class WhiteboardMessage
     private String name;
     private String photoUrl;
     private String imageUrl;
-
     public WhiteboardMessage()
     {
     }
@@ -16,9 +15,11 @@ public class WhiteboardMessage
     {
         this.text = text;
         this.name = name;
+
         this.photoUrl = photoUrl;
         this.imageUrl = imageUrl;
     }
+
 
     public String getId() {
         return id;

@@ -8,7 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -31,30 +30,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.common.api.GoogleApiClient;
-
-// useless imports
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.GoogleAuthProvider;
 import android.content.Intent;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.analytics.FirebaseAnalytics;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -63,24 +43,10 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-
-import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.ActionBar;
-import android.content.Intent;
-import android.widget.Toast;
-import android.view.View;
-import android.util.Log;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import android.net.Uri;
-import android.os.Bundle;
-
 import de.hdodenhof.circleimageview.CircleImageView;
 
 
@@ -317,7 +283,6 @@ public class MainActivity extends AppCompatActivity
                 .equalTo(userID);
 
         query.toString();
-        Log.d(TAG, "new parent" + query);
         query.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -331,19 +296,10 @@ public class MainActivity extends AppCompatActivity
         });
     }
     private void showData(DataSnapshot dataSnapshot) {
-
-        for (DataSnapshot ds: dataSnapshot.getChildren()) {
-           /* UserInformation uInfo = new UserInformation();
-            uInfo.setEmail(ds.child("email").getValue(UserInformation.class).getEmail());
-            uInfo.setuId(ds.child("id").getValue(String.class));
-            uInfo.setRole(ds.child("role").getValue(String.class));
-            userRole = uInfo.getEmail();*/
-            userRole = ds.child("role").getValue().toString();
-            Log.d(TAG, "this may get role " + userRole);
-            Log.d(TAG, "role " + userRole);
-
-        }
         String uType = "admin";
+        for (DataSnapshot ds: dataSnapshot.getChildren()) {
+            userRole = ds.child("role").getValue().toString();
+        }
         if (userRole == null)
         {
             addUser();
@@ -354,7 +310,6 @@ public class MainActivity extends AppCompatActivity
 
         }
         else { // Otherwise show them
-            Log.d(TAG, "non visibility " + userRole);
             mMessageEditText.setVisibility(View.GONE);
             mSendButton.setVisibility(View.GONE);
         }
@@ -373,17 +328,6 @@ public class MainActivity extends AppCompatActivity
         users.put("role", defaultRole);
         users.put("id",userid);
         newUser.setValue(users);
-        //dbUsers  = FirebaseDatabase.getInstance().getReference("users");
-     //   Query query = FirebaseDatabase.getInstance().getReference("users")
-       //         .getParent();
-
-
-            //userRole = "user"; // Replace hardcoded "user" with a value retrieved from DB
-
-            // if the user is NOT an admin, make input area invisible.
-            Log.d(TAG, "user role = " +userRole);
-
-
     }
 
 

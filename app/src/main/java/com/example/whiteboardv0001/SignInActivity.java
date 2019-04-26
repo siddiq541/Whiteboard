@@ -117,8 +117,6 @@ public class SignInActivity extends AppCompatActivity {
                             Snackbar.make(findViewById(R.id.googleBtn), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                             //updateUI(null);
                         }
-
-                        // ...
                     }
                 });
     }
